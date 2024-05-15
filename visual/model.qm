@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="5.3.0" links="0">
+ <framework name="qpc"/>
+ <package name="AOs" stereotype="0x00">
+  <class name="refrigerator" superclass="qpc::QHsm">
+   <statechart properties="0x00">
+    <initial target="../1">
+     <action>mobj-&gt;ctemp=0;</action>
+     <initial_glyph conn="14,3,4,3,7,6">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="IDLE">
+     <tran trig="SETTING" target="../../2">
+      <tran_glyph conn="52,8,1,3,10">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="START" target="../../3">
+      <tran_glyph conn="32,22,2,0,6">
+       <action box="0,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="CAUTION_SIG" target="../../6">
+      <tran_glyph conn="20,16,3,3,-12,46,12">
+       <action box="-13,-3,13,3"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TIME_TICK">
+      <tran_glyph conn="20,14,3,-1,14">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="20,2,32,20"/>
+    </state>
+    <state name="SETTING">
+     <tran trig="BACK" target="../../1">
+      <tran_glyph conn="62,14,3,1,-10">
+       <action box="-8,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="CW">
+      <tran_glyph conn="62,12,3,-1,14">
+       <action box="1,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="CCW">
+      <tran_glyph conn="62,18,3,-1,14">
+       <action box="1,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TEMP_SET" target="../../4">
+      <tran_glyph conn="100,8,1,3,10">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="HUMI_SET" target="../../5">
+      <tran_glyph conn="94,22,2,3,16,16">
+       <action box="1,6,15,3"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="TIMER_BACK" target="../../1">
+      <tran_glyph conn="62,20,3,1,-10">
+       <action box="-9,1,14,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="62,2,38,20"/>
+    </state>
+    <state name="RUN">
+     <tran trig="TIME_TICK">
+      <tran_glyph conn="20,44,3,-1,14">
+       <action box="2,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="CAUTION_SIG" target="../../6">
+      <tran_glyph conn="38,50,2,0,6">
+       <action box="-3,-3,13,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="SETTING" target="../../2">
+      <tran_glyph conn="52,38,1,2,18,-16">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="BACK" target="../../7">
+      <tran_glyph conn="52,44,1,3,10,6,4">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="20,28,32,22"/>
+    </state>
+    <state name="TEMP">
+     <tran trig="CW">
+      <tran_glyph conn="110,14,3,-1,14">
+       <action box="2,-4,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="CCW">
+      <tran_glyph conn="110,20,3,-1,14">
+       <action box="2,-4,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="BACK" target="../../2">
+      <tran_glyph conn="110,16,3,1,-10">
+       <action box="-7,1,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="SETTING">
+      <tran_glyph conn="144,14,1,-1,-10">
+       <action box="-9,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="110,2,34,20"/>
+    </state>
+    <state name="HUMIDITY">
+     <tran trig="CW">
+      <tran_glyph conn="110,46,3,-1,14">
+       <action box="2,-4,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="CCW">
+      <tran_glyph conn="110,52,3,-1,14">
+       <action box="2,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="BACK" target="../../2">
+      <tran_glyph conn="110,42,3,2,-22,-20">
+       <action box="-11,1,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="SETTING">
+      <tran_glyph conn="144,44,1,-1,-13">
+       <action box="-12,-3,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="110,32,34,22"/>
+    </state>
+    <state name="CAUTION">
+     <tran trig="BACK" target="../../1">
+      <tran_glyph conn="20,60,3,3,-8,-42,8">
+       <action box="-6,-37,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="20,56,32,14"/>
+    </state>
+    <state name="STOP">
+     <tran trig="BACK" target="../../3">
+      <tran_glyph conn="66,54,3,1,-8,-8,-6">
+       <action box="-9,1,10,2"/>
+      </tran_glyph>
+     </tran>
+     <tran trig="SETTING" target="../../2">
+      <tran_glyph conn="76,42,0,2,-20">
+       <action box="1,-8,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="66,42,20,18"/>
+    </state>
+    <state_diagram size="177,74"/>
+   </statechart>
+  </class>
+ </package>
+</model>
