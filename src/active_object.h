@@ -15,6 +15,15 @@ void reset_internal_sig();
 
 void GPIO_init();
 
+typedef void (*processing_t)(float temp, float humi);
+typedef void (*run_deinit_t)(void);
+typedef void (*run_init_t)(void);
+
+typedef struct{
+    run_init_t init;
+    processing_t run;
+    run_deinit_t deinit;
+}g_run_t;
 
 typedef enum{
     NOT_PRESSED,

@@ -10,8 +10,8 @@ typedef struct{
     float humidity;
 }sht30_t;
 
-int sct_int();
-int get_sct_data(sht30_t *sht);
-
+int sht_int();
+int get_sht_data(sht30_t *sht);
+int8_t check_sht_i2c();
 
 #endif

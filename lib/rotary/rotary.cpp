@@ -106,41 +106,41 @@ uint8_t rotary_read_phase_B_status(){
     return digitalRead(DEFINE_ROTARY_PHASE_B_INPUT); 
 }
 
-void rotary_init(rotary_t *rotary){
-    pinMode(DEFINE_ROTARY_PHASE_A_INPUT,INPUT);
-    pinMode(DEFINE_ROTARY_PHASE_B_INPUT,INPUT);
-    pinMode(DEFINE_ROTARY_BUTTON_INPUT,INPUT_PULLUP);
-    rotary->rotary_previous = rotary_read_phase_A_status();
-}
+// void rotary_init(rotary_t *rotary){
+//     pinMode(DEFINE_ROTARY_PHASE_A_INPUT,INPUT);
+//     pinMode(DEFINE_ROTARY_PHASE_B_INPUT,INPUT);
+//     pinMode(DEFINE_ROTARY_BUTTON_INPUT,INPUT_PULLUP);
+//     rotary->rotary_previous = rotary_read_phase_A_status();
+// }
 
-uint8_t process_rotary_bit_value(rotary_t *rotary){
-        rotary->sig = 0;
-        rotary->sig = (rotary->ccw_value<<2)|(rotary->cw_value<<1) | (rotary->button_value);
-    return rotary->sig;
-}
+// uint8_t process_rotary_bit_value(rotary_t *rotary){
+//         rotary->sig = 0;
+//         rotary->sig = (rotary->ccw_value<<2)|(rotary->cw_value<<1) | (rotary->button_value);
+//     return rotary->sig;
+// }
 
-uint8_t process_cw_ccw_button_rotaty(rotary_t *rotary){
-    rotary->button_value = rotary_read_button_status();
-    rotary->rotary_current = rotary_read_phase_A_status();
-    if(rotary->rotary_current != rotary->rotary_previous){
-        uint8_t B = rotary_read_phase_B_status();
-        if (B != rotary->rotary_current){
-            rotary->cw_value = 1;
-            rotary->ccw_value = 0;
-            Serial.print("CW\n");
-        }
-        else{
-            rotary->cw_value = 0;
-            rotary->ccw_value = 1;
-            Serial.print("CCW\n");
-        }
-    }
-    else{
-            rotary->cw_value = 0;
-            rotary->ccw_value = 0;
-            //Serial.print("Not Rotate");
-    }
-    uint8_t rsig = process_rotary_bit_value(rotary);
-    return rsig;
-}
+// uint8_t process_cw_ccw_button_rotaty(rotary_t *rotary){
+//     rotary->button_value = rotary_read_button_status();
+//     rotary->rotary_current = rotary_read_phase_A_status();
+//     if(rotary->rotary_current != rotary->rotary_previous){
+//         uint8_t B = rotary_read_phase_B_status();
+//         if (B != rotary->rotary_current){
+//             rotary->cw_value = 1;
+//             rotary->ccw_value = 0;
+//             Serial.print("CW\n");
+//         }
+//         else{
+//             rotary->cw_value = 0;
+//             rotary->ccw_value = 1;
+//             Serial.print("CCW\n");
+//         }
+//     }
+//     else{
+//             rotary->cw_value = 0;
+//             rotary->ccw_value = 0;
+//             //Serial.print("Not Rotate");
+//     }
+//     uint8_t rsig = process_rotary_bit_value(rotary);
+//     return rsig;
+// }
 

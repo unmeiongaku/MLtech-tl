@@ -3,16 +3,22 @@
 #include "Arduino.h"
 #include "Wire.h"
 
-int sct_int(){
-    Wire.begin();
-    Wire.beginTransmission(SCT30_I2C_ADDR);
+int sht_int(){
+    //Wire.begin();
+    Wire.beginTransmission(SHT30_I2C_ADDR);
     Wire.endTransmission();
     delay(100);
     return 0;
 }
 
-int get_sct_data(sht30_t *sht){
-    Wire.beginTransmission(SCT30_I2C_ADDR);
+int8_t check_sht_i2c(){
+    Wire.beginTransmission(SHT30_I2C_ADDR);
+    int8_t error = Wire.endTransmission();
+    return error;
+}
+
+int get_sht_data(sht30_t *sht){
+    Wire.beginTransmission(SHT30_I2C_ADDR);
       // Send measurement command
     Wire.write(0x2C);
     Wire.write(0x06);
@@ -20,7 +26,7 @@ int get_sct_data(sht30_t *sht){
     Wire.endTransmission();
     //delay(100);
     // Request 6 bytes of data
-    Wire.requestFrom(SCT30_I2C_ADDR, 6);
+    Wire.requestFrom(SHT30_I2C_ADDR, 6);
     if(Wire.available() == 6){
         sht->data[0] = Wire.read();
         sht->data[1] = Wire.read();

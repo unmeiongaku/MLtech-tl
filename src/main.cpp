@@ -8,6 +8,7 @@
 
 static uint16_t process_event_value(uint8_t rotary_value, uint8_t back_sig);
 static void proobject_event_dispatcher(proobject_t *const mobj,event_t const *const e);
+static uint8_t process_button_pad_value(uint8_t btn_pad_value);
 
 static void dispatch_temp_humi_state_sig(proobject_user_event_t *ue);
 
@@ -44,6 +45,7 @@ rotarysig = rotary_loop(&rotary);
 reset_rotary(&rotary);
 
 button = digitalRead(BUTTON_BACK_SIG);
+button = process_button_pad_value(button);
 proevent = process_event_value(rotarysig,button);
 Serial.print(rotarysig);
 /*Make Event*/
@@ -88,7 +90,7 @@ switch(proevent){
 
 proobject_event_dispatcher(&A0s,&ue.super);
 
-//4. dispatch the time tick event for every 200ms
+//4. dispatch the time tick event for every  100ms
   if(millis() - current_time  >= TIME_TICK_CYCLE_DEFINE){
     //100ms has passed
     current_time = millis();
@@ -145,4 +147,40 @@ static void dispatch_temp_humi_state_sig(proobject_user_event_t *ue){
    else{
     ue->super.sig = SETTING_SIG;
    }
+}
+
+static uint8_t process_button_pad_value(uint8_t btn_pad_value){
+  static button_state_t btn_sm_state = NOT_PRESSED;
+  static uint32_t curr_time = millis();
+
+  switch(btn_sm_state){
+    case NOT_PRESSED:
+    {
+      if(btn_pad_value){
+        btn_sm_state = BOUNCE;
+        curr_time = millis();
+      }
+    break;
+    }
+    case BOUNCE:{
+    if(millis() - curr_time >= 50 ){
+      //50ms has passed 
+    if(btn_pad_value){
+        btn_sm_state = PRESSED;
+        return btn_pad_value;
+    }
+    else
+          btn_sm_state = NOT_PRESSED;
+    }
+      break;
+    case PRESSED:{
+      if(!btn_pad_value){
+        btn_sm_state = BOUNCE;
+        curr_time = millis();
+      }
+      break;
+    }
+    }
+  }
+  return 0;
 }

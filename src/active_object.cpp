@@ -29,10 +29,19 @@ bool CheckSensor = true;
 static uint8_t temp_flag_state = 0;
 static uint8_t humi_flag_state = 0;
 
+/*Sensor*/
+static sht30_t sht30;
+
+/*Caution Sig*/
+static uint8_t i2c_sht30_sig = 0;
+
 //H/W timer defining (Pointer to the Structure)
 static hw_timer_t * timer = NULL; 
 
 portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+
+/*Funtion Pointer*/
+static g_run_t g_run;
 
 void led_build_notification(uint8_t pin,int ms);
 
@@ -43,6 +52,11 @@ static event_status_t proobject_state_handle_HUMIDITY(proobject_t *const mobj, e
 static event_status_t proobject_state_handle_RUN(proobject_t *const mobj, event_t const *const e);
 static event_status_t proobject_state_handle_CAUTION(proobject_t *const mobj, event_t const *const e);
 static event_status_t proobject_state_handle_STOP(proobject_t *const mobj, event_t const *const e);
+
+
+static void processing(float temp, float humi);
+static void deinit();
+
 
 void IRAM_ATTR onTimer() {      //Defining Inerrupt function with IRAM_ATTR for faster access
  portENTER_CRITICAL_ISR(&timerMux);
@@ -103,6 +117,7 @@ void timer_isr_init(){
 
 void GPIO_init(){
   pinMode(LED_BUILTIN,OUTPUT); 
+  pinMode(BUTTON_BACK_SIG,INPUT);
 }
 
 // float convert_ms_to_s(){
@@ -111,7 +126,7 @@ void GPIO_init(){
 
 uint8_t get_internal_sig(){
     uint8_t isig;
-    isig = (autobacksig<<1) | startsig;
+    isig = (i2c_sht30_sig<<2) |(autobacksig<<1) | startsig;
     return isig;
 }
 
@@ -119,6 +134,7 @@ void reset_internal_sig(){
   autobacksig = 0;
   startsig = 0;
   time_tick_sig = 0;
+  i2c_sht30_sig = 0;
 }
 
 uint8_t get_temp_flag(){
@@ -133,6 +149,24 @@ bool isinsettingstate(){
   return isInSetting;
 }
 
+void run_init(g_run_t *grun,run_init_t init,processing_t run, run_deinit_t deinit){
+  grun->init = init;
+  grun->run = run;
+  grun->deinit = deinit;
+}
+
+void run_init(g_run_t *grun){
+  grun->init();
+}
+
+void run_processing_callback(g_run_t *grun, float temp, float humi){
+  grun->run(temp,humi);
+}
+
+void run_deinit_callback(g_run_t *grun){
+  grun->deinit();
+}
+
 void proobject_init(proobject_t *mobj){
     event_t ee;
     mobj->sensors.c_humi = DEFAULT_HUMI;
@@ -144,8 +178,41 @@ void proobject_init(proobject_t *mobj){
     isInIdle = false;
     isInSetting = false;
     ee.sig = ENTRY;
+    /*Sensor Init*/
+    sht_int();
+    /*Init Func pointer*/
+    run_init(&g_run,init,processing,deinit);
     proobject_state_machine(mobj,&ee);
 }
+
+/*ADD YOUR MAIN INIT HERE*/
+static void init(){
+  pinMode(CONTROL_OUTPUT_GPIO_TEMP,OUTPUT);
+  pinMode(CONTROL_OUTPUT_GPIO_HUMI,OUTPUT);
+}
+
+/*ADD YOUR MAIN PROCESSING HERE*/
+static void processing(float temp, float humi){
+  get_sht_data(&sht30);
+  if(sht30.ctemp<temp){
+
+  }
+  else{
+
+  }
+  if(sht30.humidity<humi){
+
+  }
+  else{
+    
+  }
+} 
+
+/*DEINIT YOUR MAIN PROCESSING*/
+static void deinit(){
+  digitalWrite(CONTROL_OUTPUT_GPIO_TEMP,LOW);
+  digitalWrite(CONTROL_OUTPUT_GPIO_HUMI,LOW);
+} 
 
 event_status_t proobject_state_machine(proobject_t *const mobj, event_t const *const e){
   switch (mobj->active_state){
@@ -197,6 +264,21 @@ static event_status_t proobject_state_handle_IDLE(proobject_t *const mobj, event
       //ActiveTimeTick = true;
       reset_lcd_start_couting();
       lcd_display(LCD_IDLE,mobj->slt,0);
+#if CATION_SENSORS_ENABLE == 1
+      /*Checking Sensor*/
+      int8_t rsl = check_sht_i2c();
+      if(rsl == 0){
+        Serial.print("I2C device found at address:");
+        Serial.print(SHT30_I2C_ADDR);
+        Serial.print("\n");
+        i2c_sht30_sig = 0;
+      }
+      else{
+        Serial.print("No I2C device found");
+        /*Enable Caution Sig*/
+        i2c_sht30_sig = 1;
+      }
+#endif
       return EVENT_HANDLED;
     }
     case EXIT:{
@@ -229,6 +311,7 @@ static event_status_t proobject_state_handle_IDLE(proobject_t *const mobj, event
 static event_status_t proobject_state_handle_SETTING(proobject_t *const mobj, event_t const *const e){
   switch(e->sig){
     case ENTRY:{
+      lcd_clear();
       isInSetting = true;
       Serial.print("SETTING_ENTRY\n");
       temp_flag_state = 1;
@@ -408,11 +491,11 @@ static event_status_t proobject_state_handle_RUN(proobject_t *const mobj, event_
       mobj->active_state = SETTING;
       return EVENT_TRANSITION; 
     }
-    // case BACK_SIG:
-    // {
-    //   mobj->active_state = STOP;
-    //   return EVENT_TRANSITION; 
-    // }
+    case BACK_SIG:
+    {
+      mobj->active_state = STOP;
+      return EVENT_TRANSITION; 
+    }
     case CAUTION_SIG:
     {
       return EVENT_TRANSITION;  
@@ -425,11 +508,14 @@ static event_status_t proobject_state_handle_STOP(proobject_t *const mobj, event
   switch(e->sig){
     case ENTRY:
     {
+      lcd_clear();
       Serial.print("STOP_ENTRY\n");
+      lcd_display(LCD_STOP,0,0);
       return EVENT_HANDLED;
     }
     case EXIT:
     {
+      lcd_clear();
       Serial.print("STOP_EXIT\n");
       return EVENT_HANDLED;
     }
@@ -453,11 +539,14 @@ static event_status_t proobject_state_handle_CAUTION(proobject_t *const mobj, ev
   switch(e->sig){
     case ENTRY:
     {
+      lcd_clear();
       Serial.print("CAUTION_ENTRY\n"); 
+      lcd_display(LCD_CAUTION,0,0);
       return EVENT_HANDLED;
     }
     case EXIT:
     {
+      lcd_clear();
       Serial.print("CAUTION_EXIT\n"); 
       return EVENT_HANDLED;
     }

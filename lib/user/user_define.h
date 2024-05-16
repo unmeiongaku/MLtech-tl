@@ -24,12 +24,12 @@
 #define    LCD_COL     20
 #define    LCD_ROW     4
 #elif LCD_TYPE == 1
-#define    LCD_COL     20
-#define    LCD_ROW     4
+#define    LCD_COL     16
+#define    LCD_ROW     2
 #endif
 
 /*Define your SCT30 */
-#define SCT30_I2C_ADDR      0X44
+#define SHT30_I2C_ADDR      0X44
 
 
 /*define Your isr*/
@@ -68,6 +68,9 @@
 #define LED_ISR_NOTIFICATION_DELAY_CALLBACK     50
 
 
+/*Define Caution Enable*/
+#define CATION_SENSORS_ENABLE               0
+
 /*Define Rotary*/
 #define DEFINE_ROTARY_PHASE_A_INPUT        19            
 #define DEFINE_ROTARY_PHASE_B_INPUT        18
@@ -78,7 +81,7 @@
 #define ROTARY_SETTING_SIG_DEFINE          3
 
 /*define Button*/
-#define BUTTON_BACK_SIG                    4                                               
+#define BUTTON_BACK_SIG                    13                                               
 
 #define START_SIGNAL_DEFINE                    1    
 #define AUTO_MENU_BACK_SIGNAL_DEFINE           2   //(1<<1)
@@ -90,4 +93,9 @@
 
 #define DEFAULT_TEMP                           24
 #define DEFAULT_HUMI                           50
+
+
+#define CONTROL_OUTPUT_GPIO_TEMP                8
+#define CONTROL_OUTPUT_GPIO_HUMI                9
+
 #endif

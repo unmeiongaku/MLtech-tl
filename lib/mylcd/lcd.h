@@ -12,6 +12,7 @@ typedef enum{
     LCD_HUMIDITY,
     LCD_RUN,
     LCD_CAUTION,
+    LCD_STOP
 }lcd_t;
 
 
